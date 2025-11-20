@@ -101,12 +101,16 @@ export default function HomeScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <LinearGradient
-                colors={['#0EA5E9', '#06B6D4']}
-                style={styles.logoGradient}
-              >
-                <MessageCircle size={40} color="#FFFFFF" strokeWidth={2.5} />
-              </LinearGradient>
+              <View style={styles.logoOuter}>
+                <LinearGradient
+                  colors={['#1E293B', '#475569']}
+                  style={styles.logoGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <MessageCircle size={36} color="#FFFFFF" strokeWidth={2.5} />
+                </LinearGradient>
+              </View>
             </View>
             <Text style={styles.appName}>pairLogic</Text>
             <Text style={styles.tagline}>AI-powered relationship mediation</Text>
@@ -282,8 +286,19 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleContinueAsCreator}>
-            <Text style={styles.primaryButtonText}>Continue</Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleContinueAsCreator}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={['#1E293B', '#475569']}
+              style={styles.primaryButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={styles.primaryButtonText}>Continue</Text>
+            </LinearGradient>
           </TouchableOpacity>
 
           <View style={styles.privacyNote}>
@@ -376,8 +391,19 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleContinueAsJoiner}>
-            <Text style={styles.primaryButtonText}>Join Session</Text>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleContinueAsJoiner}
+            activeOpacity={0.85}
+          >
+            <LinearGradient
+              colors={['#10B981', '#059669']}
+              style={styles.primaryButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={styles.primaryButtonText}>Join Session</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -402,17 +428,22 @@ const styles = StyleSheet.create({
     marginBottom: 48,
   },
   logoContainer: {
-    marginBottom: 16,
-    shadowColor: '#0EA5E9',
+    marginBottom: 20,
+  },
+  logoOuter: {
+    padding: 4,
+    borderRadius: 32,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
   },
   logoGradient: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 72,
+    height: 72,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -808,11 +839,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   primaryButton: {
-    backgroundColor: '#1E293B',
     borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: 'center',
     marginTop: 8,
+    overflow: 'hidden',
+    shadowColor: '#1E293B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  primaryButtonGradient: {
+    paddingVertical: 18,
+    alignItems: 'center',
+    borderRadius: 16,
   },
   primaryButtonText: {
     color: '#FFFFFF',

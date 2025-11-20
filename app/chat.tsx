@@ -285,13 +285,15 @@ export default function ChatScreen() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={loading || !inputText.trim() ? ['#CBD5E1', '#94A3B8'] : ['#0EA5E9', '#06B6D4']}
+            colors={loading || !inputText.trim() ? ['#E2E8F0', '#CBD5E1'] : ['#1E293B', '#475569']}
             style={styles.sendButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             {loading ? (
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
-              <Send size={20} color="#FFFFFF" strokeWidth={2.5} />
+              <Send size={22} color="#FFFFFF" strokeWidth={2.5} />
             )}
           </LinearGradient>
         </TouchableOpacity>
@@ -454,28 +456,33 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 26,
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 14,
     fontSize: 15,
     color: '#1E293B',
     maxHeight: 100,
-    marginRight: 10,
-    borderWidth: 1,
+    marginRight: 12,
+    borderWidth: 2,
     borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   sendButtonWrapper: {
-    shadowColor: '#0EA5E9',
+    shadowColor: '#1E293B',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
   sendButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
   },

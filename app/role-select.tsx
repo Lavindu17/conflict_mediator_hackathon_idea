@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState, useEffect } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { UserCircle, ArrowLeft, Check } from 'lucide-react-native';
 import { createSession, getSessionByCode, updatePartnerInfo } from '@/lib/database';
 
@@ -118,14 +119,21 @@ export default function RoleSelectScreen() {
         </View>
 
         <TouchableOpacity
-          style={[styles.continueButton, !selectedRole && styles.continueButtonDisabled]}
+          style={styles.continueButton}
           onPress={handleContinue}
           disabled={!selectedRole || loading}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <Text style={styles.continueButtonText}>
-            {loading ? 'Loading...' : 'Start Conversation'}
-          </Text>
+          <LinearGradient
+            colors={!selectedRole || loading ? ['#E2E8F0', '#CBD5E1'] : ['#1E293B', '#475569']}
+            style={styles.continueButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.continueButtonText}>
+              {loading ? 'Loading...' : 'Start Conversation'}
+            </Text>
+          </LinearGradient>
         </TouchableOpacity>
 
         <View style={styles.privacyNotice}>
@@ -311,11 +319,19 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   continueButton: {
-    backgroundColor: '#1E293B',
     borderRadius: 16,
+    marginBottom: 24,
+    overflow: 'hidden',
+    shadowColor: '#1E293B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  continueButtonGradient: {
     paddingVertical: 18,
     alignItems: 'center',
-    marginBottom: 24,
+    borderRadius: 16,
   },
   continueButtonDisabled: {
     backgroundColor: '#CBD5E1',
