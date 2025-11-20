@@ -1,7 +1,8 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
-import { Send, ArrowLeft, Bot } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Send, ArrowLeft, Bot, Sparkles } from 'lucide-react-native';
 import { Message, PartnerRole } from '@/lib/supabase';
 import {
   addMessage,
@@ -33,6 +34,7 @@ export default function ChatScreen() {
   useEffect(() => {
     loadMessages();
     loadContext();
+    sendWelcomeMessage();
 
     console.log('Setting up subscription for session:', sessionId, 'role:', partnerRole);
     const subscription = subscribeToMessages(sessionId, (payload) => {
@@ -63,6 +65,19 @@ export default function ChatScreen() {
       subscription.unsubscribe();
     };
   }, [sessionId, partnerRole]);
+
+  const sendWelcomeMessage = async () => {
+    const msgs = await getMessages(sessionId, partnerRole);
+    if (msgs.length === 0) {
+      const welcomeText = `Welcome to pairLogic! 👋\n\nI'm your AI mediator, here to help facilitate healthy communication between you and your partner.\n\nHere's how this works:\n\n🔒 **Your messages are completely private** - your partner cannot see what you share with me\n\n💬 **Be honest and open** - the more you share, the better I can help\n\n🎯 **My goal** - to understand both perspectives and offer guidance that helps you both\n\nFeel free to start by telling me what's on your mind or what you'd like to discuss with your partner.`;
+
+      const botRole = `bot_to_${partnerRole.split('_')[1]}` as any;
+      const welcomeMsg = await addMessage(sessionId, botRole, welcomeText);
+      if (welcomeMsg) {
+        setMessages([welcomeMsg]);
+      }
+    }
+  };
 
   const loadMessages = async () => {
     const msgs = await getMessages(sessionId, partnerRole);
@@ -177,13 +192,27 @@ export default function ChatScreen() {
     return (
       <View style={[styles.messageContainer, isUser && styles.messageContainerUser]}>
         {isBot && (
-          <View style={styles.botIcon}>
-            <Bot size={20} color="#FFFFFF" />
+          <LinearGradient
+            colors={['#0EA5E9', '#06B6D4']}
+            style={styles.botIcon}
+          >
+            <Sparkles size={18} color="#FFFFFF" strokeWidth={2.5} />
+          </LinearGradient>
+        )}
+        {isUser ? (
+          <LinearGradient
+            colors={['#1E293B', '#334155']}
+            style={styles.messageBubble}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={styles.userText}>{item.content}</Text>
+          </LinearGradient>
+        ) : (
+          <View style={styles.botBubble}>
+            <Text style={styles.messageText}>{item.content}</Text>
           </View>
         )}
-        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.botBubble]}>
-          <Text style={[styles.messageText, isUser && styles.userText]}>{item.content}</Text>
-        </View>
       </View>
     );
   };
@@ -194,7 +223,10 @@ export default function ChatScreen() {
       style={styles.container}
       keyboardVerticalOffset={0}
     >
-      <View style={styles.header}>
+      <LinearGradient
+        colors={['#FFFFFF', '#F8FAFC']}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <ArrowLeft size={24} color="#1E293B" strokeWidth={2.5} />
         </TouchableOpacity>
@@ -202,11 +234,14 @@ export default function ChatScreen() {
           <Text style={styles.headerTitle}>pairLogic AI</Text>
           <Text style={styles.headerSubtitle}>{sessionCode}</Text>
         </View>
-        <View style={styles.statusBadge}>
+        <LinearGradient
+          colors={['#10B981', '#059669']}
+          style={styles.statusBadge}
+        >
           <View style={styles.statusDot} />
           <Text style={styles.statusText}>Active</Text>
-        </View>
-      </View>
+        </LinearGradient>
+      </LinearGradient>
 
       <FlatList
         ref={flatListRef}
@@ -240,15 +275,21 @@ export default function ChatScreen() {
           editable={!loading}
         />
         <TouchableOpacity
-          style={[styles.sendButton, loading && styles.sendButtonDisabled]}
+          style={styles.sendButtonWrapper}
           onPress={handleSend}
           disabled={loading || !inputText.trim()}
+          activeOpacity={0.8}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Send size={20} color="#FFFFFF" />
-          )}
+          <LinearGradient
+            colors={loading || !inputText.trim() ? ['#CBD5E1', '#94A3B8'] : ['#0EA5E9', '#06B6D4']}
+            style={styles.sendButton}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Send size={20} color="#FFFFFF" strokeWidth={2.5} />
+            )}
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -292,7 +333,6 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0FDF4',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
@@ -302,12 +342,12 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#10B981',
+    backgroundColor: '#FFFFFF',
   },
   statusText: {
     fontSize: 12,
-    color: '#15803D',
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   messageList: {
     padding: 16,
@@ -355,15 +395,19 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#1E293B',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
+    shadowColor: '#0EA5E9',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   messageBubble: {
     maxWidth: '75%',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     borderRadius: 20,
   },
   userBubble: {
@@ -371,10 +415,19 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
   },
   botBubble: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
     borderBottomLeftRadius: 6,
     borderWidth: 1,
     borderColor: '#E2E8F0',
+    maxWidth: '75%',
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
   messageText: {
     fontSize: 15,
@@ -383,6 +436,8 @@ const styles = StyleSheet.create({
   },
   userText: {
     color: '#FFFFFF',
+    fontSize: 15,
+    lineHeight: 22,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -406,11 +461,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
+  sendButtonWrapper: {
+    shadowColor: '#0EA5E9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
   sendButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#1E293B',
     justifyContent: 'center',
     alignItems: 'center',
   },

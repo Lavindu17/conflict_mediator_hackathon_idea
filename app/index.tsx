@@ -1,7 +1,8 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { MessageCircle, Plus, LogIn, RefreshCw, User, Calendar, Users } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MessageCircle, Plus, LogIn, RefreshCw, User, Calendar, Users, Sparkles } from 'lucide-react-native';
 
 interface PartnerInfo {
   name: string;
@@ -93,55 +94,114 @@ export default function HomeScreen() {
 
   if (mode === 'main') {
     return (
-      <View style={styles.container}>
+      <LinearGradient
+        colors={['#F0F9FF', '#FFFFFF', '#FEF3C7']}
+        style={styles.container}
+      >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
-            <MessageCircle size={48} color="#1E293B" strokeWidth={2.5} />
+            <View style={styles.logoContainer}>
+              <LinearGradient
+                colors={['#0EA5E9', '#06B6D4']}
+                style={styles.logoGradient}
+              >
+                <MessageCircle size={40} color="#FFFFFF" strokeWidth={2.5} />
+              </LinearGradient>
+            </View>
             <Text style={styles.appName}>pairLogic</Text>
-            <Text style={styles.tagline}>Resolve conflicts together</Text>
+            <Text style={styles.tagline}>AI-powered relationship mediation</Text>
           </View>
 
           <View style={styles.optionsContainer}>
-            <TouchableOpacity style={styles.optionCard} onPress={handleCreateSession}>
-              <View style={styles.iconCircle}>
-                <Plus size={32} color="#FFFFFF" strokeWidth={2.5} />
-              </View>
-              <Text style={styles.optionTitle}>Create Session</Text>
-              <Text style={styles.optionDescription}>Start a new mediation session and share the code with your partner</Text>
+            <TouchableOpacity
+              style={styles.optionCard}
+              onPress={handleCreateSession}
+              activeOpacity={0.85}
+            >
+              <LinearGradient
+                colors={['#1E293B', '#334155']}
+                style={styles.optionCardGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.iconCircleWhite}>
+                    <Plus size={28} color="#1E293B" strokeWidth={2.5} />
+                  </View>
+                  <Text style={styles.optionTitleWhite}>Create Session</Text>
+                  <Text style={styles.optionDescriptionWhite}>Start a new mediation session and share the code with your partner</Text>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.optionCard} onPress={handleJoinSession}>
-              <View style={[styles.iconCircle, styles.iconCircleSecondary]}>
-                <LogIn size={32} color="#FFFFFF" strokeWidth={2.5} />
-              </View>
-              <Text style={styles.optionTitle}>Join Session</Text>
-              <Text style={styles.optionDescription}>Enter a session code to join an existing conversation</Text>
+            <TouchableOpacity
+              style={styles.optionCard}
+              onPress={handleJoinSession}
+              activeOpacity={0.85}
+            >
+              <LinearGradient
+                colors={['#10B981', '#059669']}
+                style={styles.optionCardGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.optionContent}>
+                  <View style={styles.iconCircleWhite}>
+                    <LogIn size={28} color="#10B981" strokeWidth={2.5} />
+                  </View>
+                  <Text style={styles.optionTitleWhite}>Join Session</Text>
+                  <Text style={styles.optionDescriptionWhite}>Enter a session code to join an existing conversation</Text>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
 
           <View style={styles.infoSection}>
-            <Text style={styles.infoTitle}>How pairLogic Works</Text>
+            <View style={styles.infoHeader}>
+              <Sparkles size={20} color="#F59E0B" strokeWidth={2.5} />
+              <Text style={styles.infoTitle}>How pairLogic Works</Text>
+            </View>
             <View style={styles.stepsList}>
               <View style={styles.step}>
-                <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
+                <LinearGradient
+                  colors={['#3B82F6', '#2563EB']}
+                  style={styles.stepNumber}
+                >
+                  <Text style={styles.stepNumberText}>1</Text>
+                </LinearGradient>
                 <Text style={styles.stepText}>One partner creates a session</Text>
               </View>
               <View style={styles.step}>
-                <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
+                <LinearGradient
+                  colors={['#8B5CF6', '#7C3AED']}
+                  style={styles.stepNumber}
+                >
+                  <Text style={styles.stepNumberText}>2</Text>
+                </LinearGradient>
                 <Text style={styles.stepText}>Share the code with your partner</Text>
               </View>
               <View style={styles.step}>
-                <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
+                <LinearGradient
+                  colors={['#EC4899', '#DB2777']}
+                  style={styles.stepNumber}
+                >
+                  <Text style={styles.stepNumberText}>3</Text>
+                </LinearGradient>
                 <Text style={styles.stepText}>Both partners chat privately with the AI</Text>
               </View>
               <View style={styles.step}>
-                <View style={styles.stepNumber}><Text style={styles.stepNumberText}>4</Text></View>
+                <LinearGradient
+                  colors={['#10B981', '#059669']}
+                  style={styles.stepNumber}
+                >
+                  <Text style={styles.stepNumberText}>4</Text>
+                </LinearGradient>
                 <Text style={styles.stepText}>Receive personalized guidance</Text>
               </View>
             </View>
           </View>
         </ScrollView>
-      </View>
+      </LinearGradient>
     );
   }
 
@@ -341,12 +401,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 48,
   },
+  logoContainer: {
+    marginBottom: 16,
+    shadowColor: '#0EA5E9',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  logoGradient: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   appName: {
-    fontSize: 36,
-    fontWeight: '700',
+    fontSize: 40,
+    fontWeight: '800',
     color: '#1E293B',
-    marginTop: 16,
-    letterSpacing: -1,
+    marginTop: 8,
+    letterSpacing: -1.5,
   },
   tagline: {
     fontSize: 16,
@@ -355,15 +430,38 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   optionsContainer: {
-    gap: 16,
+    gap: 20,
     marginBottom: 48,
   },
   optionCard: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  optionCardGradient: {
+    padding: 28,
+    borderRadius: 24,
+  },
+  optionContent: {
+    alignItems: 'flex-start',
+  },
+  iconCircleWhite: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   iconCircle: {
     width: 64,
@@ -383,23 +481,45 @@ const styles = StyleSheet.create({
     color: '#1E293B',
     marginBottom: 8,
   },
+  optionTitleWhite: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
   optionDescription: {
     fontSize: 14,
     color: '#64748B',
     lineHeight: 20,
   },
+  optionDescriptionWhite: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    opacity: 0.9,
+    lineHeight: 21,
+  },
   infoSection: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 24,
+    padding: 28,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(226, 232, 240, 0.5)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
   },
   infoTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#1E293B',
-    marginBottom: 20,
   },
   stepsList: {
     gap: 16,
@@ -407,26 +527,31 @@ const styles = StyleSheet.create({
   step: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
   },
   stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#1E293B',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   stepNumberText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
   },
   stepText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     color: '#475569',
-    lineHeight: 20,
+    lineHeight: 22,
+    fontWeight: '500',
   },
   backButton: {
     marginBottom: 24,
