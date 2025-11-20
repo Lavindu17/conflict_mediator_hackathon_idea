@@ -16,10 +16,11 @@ import {
 import { sendMessage, GeminiMessage, checkIfReadyForMediation, generateMediation } from '@/lib/gemini';
 
 export default function ChatScreen() {
-  const { sessionId, sessionCode, role } = useLocalSearchParams<{
+  const { sessionId, sessionCode, role, partnerName } = useLocalSearchParams<{
     sessionId: string;
     sessionCode: string;
     role: string;
+    partnerName?: string;
   }>();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -28,13 +29,13 @@ export default function ChatScreen() {
   const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
   const [conversationHistory, setConversationHistory] = useState<GeminiMessage[]>([]);
   const flatListRef = useRef<FlatList>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const partnerRole = role as PartnerRole;
 
   useEffect(() => {
     loadMessages();
     loadContext();
-    sendWelcomeMessage();
 
     console.log('Setting up subscription for session:', sessionId, 'role:', partnerRole);
     const subscription = subscribeToMessages(sessionId, (payload) => {
@@ -66,22 +67,12 @@ export default function ChatScreen() {
     };
   }, [sessionId, partnerRole]);
 
-  const sendWelcomeMessage = async () => {
-    const msgs = await getMessages(sessionId, partnerRole);
-    if (msgs.length === 0) {
-      const welcomeText = `Welcome to pairLogic! 👋\n\nI'm your AI mediator, here to help facilitate healthy communication between you and your partner.\n\nHere's how this works:\n\n🔒 **Your messages are completely private** - your partner cannot see what you share with me\n\n💬 **Be honest and open** - the more you share, the better I can help\n\n🎯 **My goal** - to understand both perspectives and offer guidance that helps you both\n\nFeel free to start by telling me what's on your mind or what you'd like to discuss with your partner.`;
-
-      const botRole = `bot_to_${partnerRole.split('_')[1]}` as any;
-      const welcomeMsg = await addMessage(sessionId, botRole, welcomeText);
-      if (welcomeMsg) {
-        setMessages([welcomeMsg]);
-      }
-    }
-  };
-
   const loadMessages = async () => {
     const msgs = await getMessages(sessionId, partnerRole);
     setMessages(msgs);
+    if (msgs.length === 0) {
+      setShowWelcome(true);
+    }
   };
 
   const loadContext = async () => {
@@ -137,6 +128,7 @@ export default function ChatScreen() {
     const userMessage = inputText.trim();
     setInputText('');
     setLoading(true);
+    setShowWelcome(false);
 
     try {
       const userMsg = await addMessage(sessionId, partnerRole, userMessage);
@@ -250,16 +242,28 @@ export default function ChatScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messageList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconCircle}>
-              <Bot size={40} color="#64748B" strokeWidth={2} />
+        ListHeaderComponent={
+          showWelcome && messages.length === 0 ? (
+            <View style={styles.messageContainer}>
+              <LinearGradient
+                colors={['#0EA5E9', '#06B6D4']}
+                style={styles.botIcon}
+              >
+                <Sparkles size={18} color="#FFFFFF" strokeWidth={2.5} />
+              </LinearGradient>
+              <View style={styles.botBubble}>
+                <Text style={styles.messageText}>
+                  Welcome to pairLogic, {partnerName || 'there'}! 👋{'\n\n'}
+                  I'm your AI mediator, here to help facilitate healthy communication between you and your partner.{'\n\n'}
+                  Here's how this works:{'\n\n'}
+                  🔒 Your messages are completely private - your partner cannot see what you share with me{'\n\n'}
+                  💬 Be honest and open - the more you share, the better I can help{'\n\n'}
+                  🎯 My goal - to understand both perspectives and offer guidance that helps you both{'\n\n'}
+                  Feel free to start by telling me what's on your mind or what you'd like to discuss with your partner.
+                </Text>
+              </View>
             </View>
-            <Text style={styles.emptyTitle}>Start Your Conversation</Text>
-            <Text style={styles.emptyText}>
-              Share your thoughts privately with the AI mediator. Your partner won't see these messages.
-            </Text>
-          </View>
+          ) : null
         }
       />
 

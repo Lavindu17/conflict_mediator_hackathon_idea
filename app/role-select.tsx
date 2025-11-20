@@ -68,6 +68,7 @@ export default function RoleSelectScreen() {
           sessionId: session.id,
           sessionCode: sessionCode,
           role: selectedRole,
+          partnerName: name || '',
         },
       });
     } catch (error) {
