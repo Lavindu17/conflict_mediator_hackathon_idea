@@ -196,11 +196,15 @@ export default function ChatScreen() {
     >
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <ArrowLeft size={24} color="#2C3E50" />
+          <ArrowLeft size={24} color="#1E293B" strokeWidth={2.5} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>CoupleBot Mediator</Text>
-          <Text style={styles.headerSubtitle}>Session: {sessionCode}</Text>
+          <Text style={styles.headerTitle}>pairLogic AI</Text>
+          <Text style={styles.headerSubtitle}>{sessionCode}</Text>
+        </View>
+        <View style={styles.statusBadge}>
+          <View style={styles.statusDot} />
+          <Text style={styles.statusText}>Active</Text>
         </View>
       </View>
 
@@ -213,9 +217,12 @@ export default function ChatScreen() {
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Bot size={48} color="#BDC3C7" strokeWidth={2} />
+            <View style={styles.emptyIconCircle}>
+              <Bot size={40} color="#64748B" strokeWidth={2} />
+            </View>
+            <Text style={styles.emptyTitle}>Start Your Conversation</Text>
             <Text style={styles.emptyText}>
-              Start sharing your perspective with the mediator bot
+              Share your thoughts privately with the AI mediator. Your partner won't see these messages.
             </Text>
           </View>
         }
@@ -251,19 +258,21 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    paddingTop: 60,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#ECF0F1',
+    borderBottomColor: '#F1F5F9',
   },
   backButton: {
-    padding: 8,
-    marginRight: 8,
+    padding: 4,
+    marginRight: 12,
   },
   headerInfo: {
     flex: 1,
@@ -271,12 +280,34 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2C3E50',
+    color: '#1E293B',
   },
   headerSubtitle: {
     fontSize: 12,
-    color: '#7F8C8D',
+    color: '#64748B',
     marginTop: 2,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 6,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+  },
+  statusText: {
+    fontSize: 12,
+    color: '#15803D',
+    fontWeight: '600',
   },
   messageList: {
     padding: 16,
@@ -287,13 +318,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
   },
   emptyText: {
-    marginTop: 16,
     fontSize: 14,
-    color: '#95A5A6',
+    color: '#64748B',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 21,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -304,31 +352,34 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   botIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#E74C3C',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#1E293B',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: 10,
   },
   messageBubble: {
     maxWidth: '75%',
-    padding: 12,
-    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 20,
   },
   userBubble: {
-    backgroundColor: '#E74C3C',
-    borderBottomRightRadius: 4,
+    backgroundColor: '#1E293B',
+    borderBottomRightRadius: 6,
   },
   botBubble: {
-    backgroundColor: '#FFFFFF',
-    borderBottomLeftRadius: 4,
+    backgroundColor: '#F8FAFC',
+    borderBottomLeftRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   messageText: {
     fontSize: 15,
-    color: '#2C3E50',
-    lineHeight: 20,
+    color: '#1E293B',
+    lineHeight: 22,
   },
   userText: {
     color: '#FFFFFF',
@@ -336,31 +387,34 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     padding: 16,
+    paddingBottom: 24,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#ECF0F1',
+    borderTopColor: '#F1F5F9',
     alignItems: 'center',
   },
   input: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     fontSize: 15,
-    color: '#2C3E50',
+    color: '#1E293B',
     maxHeight: 100,
-    marginRight: 8,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#E74C3C',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#1E293B',
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendButtonDisabled: {
-    backgroundColor: '#BDC3C7',
+    backgroundColor: '#CBD5E1',
   },
 });

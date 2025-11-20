@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState } from 'react';
-import { UserCircle } from 'lucide-react-native';
+import { UserCircle, ArrowLeft, Check } from 'lucide-react-native';
 import { createSession, getSessionByCode } from '@/lib/database';
 
 export default function RoleSelectScreen() {
@@ -61,14 +61,19 @@ export default function RoleSelectScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowLeft size={24} color="#64748B" strokeWidth={2} />
+        </TouchableOpacity>
+
         <View style={styles.header}>
-          <Text style={styles.title}>Select Your Role</Text>
-          <Text style={styles.subtitle}>
-            Session: <Text style={styles.code}>{sessionCode}</Text>
-          </Text>
+          <Text style={styles.title}>Choose Your Role</Text>
+          <View style={styles.codeContainer}>
+            <Text style={styles.codeLabel}>Session Code</Text>
+            <Text style={styles.code}>{sessionCode}</Text>
+          </View>
           <Text style={styles.description}>
-            Choose which partner you are. This is for internal organization only.
+            Select which partner you are. This is for organizing the conversation only.
           </Text>
         </View>
 
@@ -76,12 +81,20 @@ export default function RoleSelectScreen() {
           <TouchableOpacity
             style={[styles.roleCard, selectedRole === 'partner_a' && styles.roleCardSelected]}
             onPress={() => handleRoleSelect('partner_a')}
+            activeOpacity={0.7}
           >
-            <UserCircle
-              size={64}
-              color={selectedRole === 'partner_a' ? '#E74C3C' : '#7F8C8D'}
-              strokeWidth={2}
-            />
+            {selectedRole === 'partner_a' && (
+              <View style={styles.checkBadge}>
+                <Check size={20} color="#FFFFFF" strokeWidth={3} />
+              </View>
+            )}
+            <View style={[styles.roleIconCircle, selectedRole === 'partner_a' && styles.roleIconCircleSelected]}>
+              <UserCircle
+                size={48}
+                color={selectedRole === 'partner_a' ? '#1E293B' : '#94A3B8'}
+                strokeWidth={2}
+              />
+            </View>
             <Text
               style={[
                 styles.roleTitle,
@@ -90,18 +103,26 @@ export default function RoleSelectScreen() {
             >
               Partner A
             </Text>
-            <Text style={styles.roleDescription}>Select if you initiated the session</Text>
+            <Text style={styles.roleDescription}>Typically the session creator</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.roleCard, selectedRole === 'partner_b' && styles.roleCardSelected]}
             onPress={() => handleRoleSelect('partner_b')}
+            activeOpacity={0.7}
           >
-            <UserCircle
-              size={64}
-              color={selectedRole === 'partner_b' ? '#E74C3C' : '#7F8C8D'}
-              strokeWidth={2}
-            />
+            {selectedRole === 'partner_b' && (
+              <View style={styles.checkBadge}>
+                <Check size={20} color="#FFFFFF" strokeWidth={3} />
+              </View>
+            )}
+            <View style={[styles.roleIconCircle, selectedRole === 'partner_b' && styles.roleIconCircleSelected]}>
+              <UserCircle
+                size={48}
+                color={selectedRole === 'partner_b' ? '#1E293B' : '#94A3B8'}
+                strokeWidth={2}
+              />
+            </View>
             <Text
               style={[
                 styles.roleTitle,
@@ -110,7 +131,7 @@ export default function RoleSelectScreen() {
             >
               Partner B
             </Text>
-            <Text style={styles.roleDescription}>Select if you joined the session</Text>
+            <Text style={styles.roleDescription}>Typically joined with the code</Text>
           </TouchableOpacity>
         </View>
 
@@ -118,18 +139,19 @@ export default function RoleSelectScreen() {
           style={[styles.continueButton, !selectedRole && styles.continueButtonDisabled]}
           onPress={handleContinue}
           disabled={!selectedRole || loading}
+          activeOpacity={0.8}
         >
           <Text style={styles.continueButtonText}>
-            {loading ? 'Loading...' : 'Continue to Chat'}
+            {loading ? 'Loading...' : 'Start Conversation'}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.privacyNotice}>
           <Text style={styles.privacyText}>
-            Your messages are private. Your partner cannot see what you share with the bot.
+            Your conversations are completely private. Your partner cannot see what you share with the AI mediator.
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -137,99 +159,145 @@ export default function RoleSelectScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: '#FFFFFF',
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     padding: 24,
-    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: 32,
+    padding: 8,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#2C3E50',
-    marginBottom: 12,
+    color: '#1E293B',
+    marginBottom: 24,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#7F8C8D',
-    marginBottom: 8,
+  codeContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 16,
+  },
+  codeLabel: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
   },
   code: {
+    fontSize: 20,
     fontWeight: '700',
-    color: '#E74C3C',
+    color: '#1E293B',
+    letterSpacing: 1,
+    textAlign: 'center',
   },
   description: {
     fontSize: 14,
-    color: '#95A5A6',
+    color: '#64748B',
     textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 20,
+    lineHeight: 21,
+    paddingHorizontal: 20,
   },
   roleContainer: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 24,
+    gap: 12,
+    marginBottom: 32,
   },
   roleCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 20,
     padding: 24,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#ECF0F1',
+    borderColor: '#E2E8F0',
+    position: 'relative',
   },
   roleCardSelected: {
-    borderColor: '#E74C3C',
-    backgroundColor: '#FFF5F5',
+    borderColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
+  },
+  checkBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#10B981',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  roleIconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#E2E8F0',
+  },
+  roleIconCircleSelected: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#1E293B',
   },
   roleTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2C3E50',
-    marginTop: 16,
+    color: '#64748B',
     marginBottom: 8,
   },
   roleTitleSelected: {
-    color: '#E74C3C',
+    color: '#1E293B',
   },
   roleDescription: {
     fontSize: 12,
-    color: '#95A5A6',
+    color: '#94A3B8',
     textAlign: 'center',
     lineHeight: 18,
   },
   continueButton: {
-    backgroundColor: '#E74C3C',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
+    paddingVertical: 18,
     alignItems: 'center',
+    marginBottom: 24,
   },
   continueButtonDisabled: {
-    backgroundColor: '#BDC3C7',
+    backgroundColor: '#CBD5E1',
   },
   continueButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
   },
   privacyNotice: {
-    marginTop: 24,
-    padding: 16,
-    backgroundColor: '#E8F8F5',
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#27AE60',
+    backgroundColor: '#F0FDF4',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
   },
   privacyText: {
     fontSize: 13,
-    color: '#27AE60',
+    color: '#15803D',
     textAlign: 'center',
     lineHeight: 20,
+    fontWeight: '500',
   },
 });
