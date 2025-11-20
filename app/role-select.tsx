@@ -1,16 +1,27 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserCircle, ArrowLeft, Check } from 'lucide-react-native';
-import { createSession, getSessionByCode } from '@/lib/database';
+import { createSession, getSessionByCode, updatePartnerInfo } from '@/lib/database';
 
 export default function RoleSelectScreen() {
-  const { sessionCode, isCreator } = useLocalSearchParams<{
+  const { sessionCode, isCreator, name, age, gender } = useLocalSearchParams<{
     sessionCode: string;
     isCreator: string;
+    name?: string;
+    age?: string;
+    gender?: string;
   }>();
   const [selectedRole, setSelectedRole] = useState<'partner_a' | 'partner_b' | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isCreator === 'true') {
+      setSelectedRole('partner_a');
+    } else {
+      setSelectedRole('partner_b');
+    }
+  }, [isCreator]);
 
   const handleRoleSelect = (role: 'partner_a' | 'partner_b') => {
     setSelectedRole(role);
@@ -26,9 +37,14 @@ export default function RoleSelectScreen() {
 
     try {
       let session;
+      const partnerInfo = name && age && gender ? {
+        name: name,
+        age: Number(age),
+        gender: gender
+      } : undefined;
 
       if (isCreator === 'true') {
-        session = await createSession(sessionCode);
+        session = await createSession(sessionCode, partnerInfo);
         if (!session) {
           Alert.alert('Error', 'Failed to create session. Please try again.');
           setLoading(false);
@@ -40,6 +56,9 @@ export default function RoleSelectScreen() {
           Alert.alert('Error', 'Session not found. Please check the code and try again.');
           setLoading(false);
           return;
+        }
+        if (partnerInfo) {
+          await updatePartnerInfo(session.id, selectedRole, partnerInfo);
         }
       }
 
@@ -67,72 +86,34 @@ export default function RoleSelectScreen() {
         </TouchableOpacity>
 
         <View style={styles.header}>
-          <Text style={styles.title}>Choose Your Role</Text>
+          <View style={styles.checkCircle}>
+            <Check size={32} color="#10B981" strokeWidth={3} />
+          </View>
+          <Text style={styles.title}>
+            {isCreator === 'true' ? 'Session Created!' : 'Joining Session'}
+          </Text>
           <View style={styles.codeContainer}>
             <Text style={styles.codeLabel}>Session Code</Text>
             <Text style={styles.code}>{sessionCode}</Text>
           </View>
-          <Text style={styles.description}>
-            Select which partner you are. This is for organizing the conversation only.
-          </Text>
-        </View>
-
-        <View style={styles.roleContainer}>
-          <TouchableOpacity
-            style={[styles.roleCard, selectedRole === 'partner_a' && styles.roleCardSelected]}
-            onPress={() => handleRoleSelect('partner_a')}
-            activeOpacity={0.7}
-          >
-            {selectedRole === 'partner_a' && (
-              <View style={styles.checkBadge}>
-                <Check size={20} color="#FFFFFF" strokeWidth={3} />
-              </View>
-            )}
-            <View style={[styles.roleIconCircle, selectedRole === 'partner_a' && styles.roleIconCircleSelected]}>
-              <UserCircle
-                size={48}
-                color={selectedRole === 'partner_a' ? '#1E293B' : '#94A3B8'}
-                strokeWidth={2}
-              />
+          {name && (
+            <View style={styles.infoCard}>
+              <Text style={styles.infoLabel}>Your Information</Text>
+              <Text style={styles.infoText}>Name: {name}</Text>
+              <Text style={styles.infoText}>Age: {age}</Text>
+              <Text style={styles.infoText}>Gender: {gender}</Text>
             </View>
-            <Text
-              style={[
-                styles.roleTitle,
-                selectedRole === 'partner_a' && styles.roleTitleSelected,
-              ]}
-            >
-              Partner A
+          )}
+          <View style={styles.roleInfo}>
+            <Text style={styles.roleInfoTitle}>
+              You are <Text style={styles.roleHighlight}>{selectedRole === 'partner_a' ? 'Partner A' : 'Partner B'}</Text>
             </Text>
-            <Text style={styles.roleDescription}>Typically the session creator</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.roleCard, selectedRole === 'partner_b' && styles.roleCardSelected]}
-            onPress={() => handleRoleSelect('partner_b')}
-            activeOpacity={0.7}
-          >
-            {selectedRole === 'partner_b' && (
-              <View style={styles.checkBadge}>
-                <Check size={20} color="#FFFFFF" strokeWidth={3} />
-              </View>
-            )}
-            <View style={[styles.roleIconCircle, selectedRole === 'partner_b' && styles.roleIconCircleSelected]}>
-              <UserCircle
-                size={48}
-                color={selectedRole === 'partner_b' ? '#1E293B' : '#94A3B8'}
-                strokeWidth={2}
-              />
-            </View>
-            <Text
-              style={[
-                styles.roleTitle,
-                selectedRole === 'partner_b' && styles.roleTitleSelected,
-              ]}
-            >
-              Partner B
+            <Text style={styles.roleInfoDesc}>
+              {isCreator === 'true'
+                ? 'As the session creator, you are Partner A'
+                : 'You joined with a code, so you are Partner B'}
             </Text>
-            <Text style={styles.roleDescription}>Typically joined with the code</Text>
-          </TouchableOpacity>
+          </View>
         </View>
 
         <TouchableOpacity
@@ -175,11 +156,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
+  checkCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#DCFCE7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#1E293B',
     marginBottom: 24,
+    textAlign: 'center',
   },
   codeContainer: {
     backgroundColor: '#F8FAFC',
@@ -188,7 +179,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 16,
+    marginBottom: 24,
   },
   codeLabel: {
     fontSize: 12,
@@ -203,6 +194,53 @@ const styles = StyleSheet.create({
     color: '#1E293B',
     letterSpacing: 1,
     textAlign: 'center',
+  },
+  infoCard: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    alignSelf: 'stretch',
+  },
+  infoLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#64748B',
+    marginBottom: 4,
+  },
+  roleInfo: {
+    backgroundColor: '#FEF9C3',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#FDE047',
+    alignSelf: 'stretch',
+  },
+  roleInfoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#854D0E',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  roleHighlight: {
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  roleInfoDesc: {
+    fontSize: 13,
+    color: '#A16207',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   description: {
     fontSize: 14,

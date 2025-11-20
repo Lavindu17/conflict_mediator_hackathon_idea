@@ -1,12 +1,23 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { MessageCircle, Plus, LogIn, RefreshCw } from 'lucide-react-native';
+import { MessageCircle, Plus, LogIn, RefreshCw, User, Calendar, Users } from 'lucide-react-native';
+
+interface PartnerInfo {
+  name: string;
+  age: string;
+  gender: string;
+}
 
 export default function HomeScreen() {
   const [sessionCode, setSessionCode] = useState('');
-  const [mode, setMode] = useState<'main' | 'create' | 'join'>('main');
+  const [mode, setMode] = useState<'main' | 'create' | 'join' | 'info-create' | 'info-join'>('main');
   const [generatedCode, setGeneratedCode] = useState('');
+  const [partnerInfo, setPartnerInfo] = useState<PartnerInfo>({
+    name: '',
+    age: '',
+    gender: '',
+  });
 
   const generateSessionCode = () => {
     const words = ['TALK', 'CHAT', 'RESOLVE', 'LISTEN', 'CONNECT', 'HEAL'];
@@ -18,7 +29,11 @@ export default function HomeScreen() {
   const handleCreateSession = () => {
     const code = generateSessionCode();
     setGeneratedCode(code);
-    setMode('create');
+    setMode('info-create');
+  };
+
+  const handleJoinSession = () => {
+    setMode('info-join');
   };
 
   const handleRegenerateCode = () => {
@@ -26,22 +41,53 @@ export default function HomeScreen() {
     setGeneratedCode(code);
   };
 
-  const handleStartWithCode = () => {
+  const validatePartnerInfo = () => {
+    if (!partnerInfo.name.trim()) {
+      Alert.alert('Required', 'Please enter your name');
+      return false;
+    }
+    if (!partnerInfo.age.trim() || isNaN(Number(partnerInfo.age)) || Number(partnerInfo.age) < 18 || Number(partnerInfo.age) > 120) {
+      Alert.alert('Invalid Age', 'Please enter a valid age (18-120)');
+      return false;
+    }
+    if (!partnerInfo.gender) {
+      Alert.alert('Required', 'Please select your gender');
+      return false;
+    }
+    return true;
+  };
+
+  const handleContinueAsCreator = () => {
+    if (!validatePartnerInfo()) return;
+
     router.push({
       pathname: '/role-select',
-      params: { sessionCode: generatedCode, isCreator: 'true' },
+      params: {
+        sessionCode: generatedCode,
+        isCreator: 'true',
+        name: partnerInfo.name,
+        age: partnerInfo.age,
+        gender: partnerInfo.gender,
+      },
     });
   };
 
-  const handleJoinSession = () => {
+  const handleContinueAsJoiner = () => {
     if (!sessionCode.trim()) {
       Alert.alert('Required', 'Please enter a session code');
       return;
     }
+    if (!validatePartnerInfo()) return;
 
     router.push({
       pathname: '/role-select',
-      params: { sessionCode: sessionCode.toUpperCase(), isCreator: 'false' },
+      params: {
+        sessionCode: sessionCode.toUpperCase(),
+        isCreator: 'false',
+        name: partnerInfo.name,
+        age: partnerInfo.age,
+        gender: partnerInfo.gender,
+      },
     });
   };
 
@@ -64,7 +110,7 @@ export default function HomeScreen() {
               <Text style={styles.optionDescription}>Start a new mediation session and share the code with your partner</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.optionCard} onPress={() => setMode('join')}>
+            <TouchableOpacity style={styles.optionCard} onPress={handleJoinSession}>
               <View style={[styles.iconCircle, styles.iconCircleSecondary]}>
                 <LogIn size={32} color="#FFFFFF" strokeWidth={2.5} />
               </View>
@@ -99,72 +145,120 @@ export default function HomeScreen() {
     );
   }
 
-  if (mode === 'create') {
+  if (mode === 'info-create') {
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.backButton}>
-            <TouchableOpacity onPress={() => setMode('main')} style={styles.backButtonTouch}>
-              <Text style={styles.backButtonText}>← Back</Text>
-            </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMode('main')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+
+          <View style={styles.formHeader}>
+            <View style={styles.headerIconCircle}>
+              <User size={32} color="#1E293B" strokeWidth={2.5} />
+            </View>
+            <Text style={styles.formTitle}>Tell us about yourself</Text>
+            <Text style={styles.formSubtitle}>This helps the AI provide better guidance</Text>
           </View>
 
-          <View style={styles.createContent}>
-            <View style={styles.successIcon}>
-              <MessageCircle size={56} color="#10B981" strokeWidth={2.5} />
+          <View style={styles.codePreview}>
+            <Text style={styles.codePreviewLabel}>Your Session Code</Text>
+            <View style={styles.codePreviewBox}>
+              <Text style={styles.codePreviewText}>{generatedCode}</Text>
+              <TouchableOpacity onPress={handleRegenerateCode} style={styles.codeRefreshIcon}>
+                <RefreshCw size={18} color="#64748B" strokeWidth={2} />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.createTitle}>Session Created!</Text>
-            <Text style={styles.createSubtitle}>Share this code with your partner</Text>
+          </View>
 
-            <View style={styles.codeDisplay}>
-              <Text style={styles.codeText}>{generatedCode}</Text>
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Name</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Enter your name"
+              placeholderTextColor="#94A3B8"
+              value={partnerInfo.name}
+              onChangeText={(text) => setPartnerInfo({ ...partnerInfo, name: text })}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Age</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Enter your age"
+              placeholderTextColor="#94A3B8"
+              value={partnerInfo.age}
+              onChangeText={(text) => setPartnerInfo({ ...partnerInfo, age: text })}
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Gender</Text>
+            <View style={styles.genderOptions}>
+              <TouchableOpacity
+                style={[styles.genderButton, partnerInfo.gender === 'Male' && styles.genderButtonSelected]}
+                onPress={() => setPartnerInfo({ ...partnerInfo, gender: 'Male' })}
+              >
+                <Text style={[styles.genderButtonText, partnerInfo.gender === 'Male' && styles.genderButtonTextSelected]}>Male</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.genderButton, partnerInfo.gender === 'Female' && styles.genderButtonSelected]}
+                onPress={() => setPartnerInfo({ ...partnerInfo, gender: 'Female' })}
+              >
+                <Text style={[styles.genderButtonText, partnerInfo.gender === 'Female' && styles.genderButtonTextSelected]}>Female</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.genderButton, partnerInfo.gender === 'Other' && styles.genderButtonSelected]}
+                onPress={() => setPartnerInfo({ ...partnerInfo, gender: 'Other' })}
+              >
+                <Text style={[styles.genderButtonText, partnerInfo.gender === 'Other' && styles.genderButtonTextSelected]}>Other</Text>
+              </TouchableOpacity>
             </View>
+          </View>
 
-            <TouchableOpacity style={styles.regenerateButton} onPress={handleRegenerateCode}>
-              <RefreshCw size={20} color="#64748B" strokeWidth={2} />
-              <Text style={styles.regenerateText}>Generate New Code</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.primaryButton} onPress={handleContinueAsCreator}>
+            <Text style={styles.primaryButtonText}>Continue</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.continueButton} onPress={handleStartWithCode}>
-              <Text style={styles.continueButtonText}>Continue to Session</Text>
-            </TouchableOpacity>
-
-            <View style={styles.instructionBox}>
-              <Text style={styles.instructionText}>
-                Your partner needs this code to join the session. Once both of you join and select your roles, you'll each chat privately with the AI mediator.
-              </Text>
-            </View>
+          <View style={styles.privacyNote}>
+            <Text style={styles.privacyNoteText}>
+              Share the code <Text style={styles.boldText}>{generatedCode}</Text> with your partner to begin
+            </Text>
           </View>
         </ScrollView>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.backButton}>
-          <TouchableOpacity onPress={() => setMode('main')} style={styles.backButtonTouch}>
+  if (mode === 'info-join') {
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <TouchableOpacity onPress={() => setMode('main')} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.joinContent}>
-          <View style={styles.joinHeader}>
-            <View style={styles.joinIcon}>
-              <LogIn size={48} color="#1E293B" strokeWidth={2.5} />
+          <View style={styles.formHeader}>
+            <View style={styles.headerIconCircle}>
+              <User size={32} color="#1E293B" strokeWidth={2.5} />
             </View>
-            <Text style={styles.joinTitle}>Join Session</Text>
-            <Text style={styles.joinSubtitle}>Enter the session code shared by your partner</Text>
+            <Text style={styles.formTitle}>Tell us about yourself</Text>
+            <Text style={styles.formSubtitle}>This helps the AI provide better guidance</Text>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Session Code</Text>
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Session Code</Text>
             <TextInput
-              style={styles.input}
+              style={styles.formInput}
               placeholder="e.g., HEAL-123"
               placeholderTextColor="#94A3B8"
               value={sessionCode}
@@ -174,13 +268,63 @@ export default function HomeScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.joinButton} onPress={handleJoinSession}>
-            <Text style={styles.joinButtonText}>Join Session</Text>
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Name</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Enter your name"
+              placeholderTextColor="#94A3B8"
+              value={partnerInfo.name}
+              onChangeText={(text) => setPartnerInfo({ ...partnerInfo, name: text })}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Age</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Enter your age"
+              placeholderTextColor="#94A3B8"
+              value={partnerInfo.age}
+              onChangeText={(text) => setPartnerInfo({ ...partnerInfo, age: text })}
+              keyboardType="number-pad"
+              maxLength={3}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Gender</Text>
+            <View style={styles.genderOptions}>
+              <TouchableOpacity
+                style={[styles.genderButton, partnerInfo.gender === 'Male' && styles.genderButtonSelected]}
+                onPress={() => setPartnerInfo({ ...partnerInfo, gender: 'Male' })}
+              >
+                <Text style={[styles.genderButtonText, partnerInfo.gender === 'Male' && styles.genderButtonTextSelected]}>Male</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.genderButton, partnerInfo.gender === 'Female' && styles.genderButtonSelected]}
+                onPress={() => setPartnerInfo({ ...partnerInfo, gender: 'Female' })}
+              >
+                <Text style={[styles.genderButtonText, partnerInfo.gender === 'Female' && styles.genderButtonTextSelected]}>Female</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.genderButton, partnerInfo.gender === 'Other' && styles.genderButtonSelected]}
+                onPress={() => setPartnerInfo({ ...partnerInfo, gender: 'Other' })}
+              >
+                <Text style={[styles.genderButtonText, partnerInfo.gender === 'Other' && styles.genderButtonTextSelected]}>Other</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.primaryButton} onPress={handleContinueAsJoiner}>
+            <Text style={styles.primaryButtonText}>Join Session</Text>
           </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+        </ScrollView>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return null;
 }
 
 const styles = StyleSheet.create({
@@ -437,5 +581,135 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '700',
+  },
+  formHeader: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  headerIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  formTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  formSubtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+  },
+  codePreview: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  codePreviewLabel: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  codePreviewBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  codePreviewText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1E293B',
+    letterSpacing: 1,
+  },
+  codeRefreshIcon: {
+    padding: 4,
+  },
+  formSection: {
+    marginBottom: 24,
+  },
+  formLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1E293B',
+    marginBottom: 10,
+  },
+  formInput: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#1E293B',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  genderOptions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  genderButton: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E2E8F0',
+  },
+  genderButtonSelected: {
+    backgroundColor: '#1E293B',
+    borderColor: '#1E293B',
+  },
+  genderButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  genderButtonTextSelected: {
+    color: '#FFFFFF',
+  },
+  primaryButton: {
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  privacyNote: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 24,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  privacyNoteText: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  boldText: {
+    fontWeight: '700',
+    color: '#1E293B',
   },
 });

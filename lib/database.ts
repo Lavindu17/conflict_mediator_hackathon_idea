@@ -1,19 +1,30 @@
 import { supabase, Session, Message, SessionContext, PartnerRole, MessageRole } from './supabase';
 
-export const createSession = async (sessionCode: string): Promise<Session | null> => {
+export const createSession = async (
+  sessionCode: string,
+  partnerInfo?: { name: string; age: number; gender: string }
+): Promise<Session | null> => {
   const existingSession = await getSessionByCode(sessionCode);
   if (existingSession) {
     return existingSession;
   }
 
+  const sessionData: any = {
+    session_code: sessionCode,
+    status: 'waiting',
+    partner_a_ready: false,
+    partner_b_ready: false,
+  };
+
+  if (partnerInfo) {
+    sessionData.partner_a_name = partnerInfo.name;
+    sessionData.partner_a_age = partnerInfo.age;
+    sessionData.partner_a_gender = partnerInfo.gender;
+  }
+
   const { data, error } = await supabase
     .from('sessions')
-    .insert({
-      session_code: sessionCode,
-      status: 'waiting',
-      partner_a_ready: false,
-      partner_b_ready: false,
-    })
+    .insert(sessionData)
     .select()
     .maybeSingle();
 
@@ -30,6 +41,36 @@ export const createSession = async (sessionCode: string): Promise<Session | null
   }
 
   return data;
+};
+
+export const updatePartnerInfo = async (
+  sessionId: string,
+  partnerRole: 'partner_a' | 'partner_b',
+  partnerInfo: { name: string; age: number; gender: string }
+): Promise<boolean> => {
+  const updates: any = {};
+
+  if (partnerRole === 'partner_a') {
+    updates.partner_a_name = partnerInfo.name;
+    updates.partner_a_age = partnerInfo.age;
+    updates.partner_a_gender = partnerInfo.gender;
+  } else {
+    updates.partner_b_name = partnerInfo.name;
+    updates.partner_b_age = partnerInfo.age;
+    updates.partner_b_gender = partnerInfo.gender;
+  }
+
+  const { error } = await supabase
+    .from('sessions')
+    .update(updates)
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('Error updating partner info:', error);
+    return false;
+  }
+
+  return true;
 };
 
 export const getSessionByCode = async (sessionCode: string): Promise<Session | null> => {
