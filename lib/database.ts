@@ -77,10 +77,25 @@ export const updatePartnerInfo = async (
 };
 
 export const getSessionByCode = async (sessionCode: string): Promise<Session | null> => {
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from('sessions')
     .select()
     .eq('session_code', sessionCode)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching session:', error);
+    return null;
+  }
+
+  return data;
+};
+
+export const getSessionById = async (sessionId: string): Promise<Session | null> => {
+  const { data, error } = await supabase
+    .from('sessions')
+    .select()
+    .eq('id', sessionId)
     .maybeSingle();
 
   if (error) {

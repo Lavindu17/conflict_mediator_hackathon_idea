@@ -11,7 +11,9 @@ import {
   updateSessionContext,
   subscribeToMessages,
   getSessionByCode,
+  getSessionById,
   updateSessionStatus,
+  updateChatStarted,
 } from '@/lib/database';
 import { sendMessage, GeminiMessage, checkIfReadyForMediation, generateMediation } from '@/lib/gemini';
 
@@ -30,12 +32,14 @@ export default function ChatScreen() {
   const [conversationHistory, setConversationHistory] = useState<GeminiMessage[]>([]);
   const flatListRef = useRef<FlatList>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [sessionData, setSessionData] = useState<any>(null);
 
   const partnerRole = role as PartnerRole;
 
   useEffect(() => {
     loadMessages();
     loadContext();
+    loadSessionData();
 
     console.log('Setting up subscription for session:', sessionId, 'role:', partnerRole);
     const subscription = subscribeToMessages(sessionId, (payload) => {
@@ -79,6 +83,13 @@ export default function ChatScreen() {
     const context = await getSessionContext(sessionId, partnerRole);
     if (context && context.conversation_history) {
       setConversationHistory(context.conversation_history as GeminiMessage[]);
+    }
+  };
+
+  const loadSessionData = async () => {
+    const session = await getSessionById(sessionId);
+    if (session) {
+      setSessionData(session);
     }
   };
 
@@ -131,6 +142,11 @@ export default function ChatScreen() {
     setShowWelcome(false);
 
     try {
+      if (messages.length === 0) {
+        await updateChatStarted(sessionId, partnerRole as 'partner_a' | 'partner_b');
+        await loadSessionData();
+      }
+
       const userMsg = await addMessage(sessionId, partnerRole, userMessage);
       console.log('User message added:', userMsg);
 
@@ -225,6 +241,31 @@ export default function ChatScreen() {
         <View style={styles.headerInfo}>
           <Text style={styles.headerTitle}>pairLogic AI</Text>
           <Text style={styles.headerSubtitle}>{sessionCode}</Text>
+          {sessionData && (
+            <View style={styles.progressContainer}>
+              <View style={styles.progressItem}>
+                <View style={[
+                  styles.progressDot,
+                  sessionData.partner_a_scenario_completed && sessionData.partner_a_chat_started && styles.progressDotCompleted
+                ]} />
+                <Text style={styles.progressText}>Partner A</Text>
+              </View>
+              <View style={styles.progressItem}>
+                <View style={[
+                  styles.progressDot,
+                  sessionData.partner_b_scenario_completed && sessionData.partner_b_chat_started && styles.progressDotCompleted
+                ]} />
+                <Text style={styles.progressText}>Partner B</Text>
+              </View>
+              <View style={styles.progressItem}>
+                <View style={[
+                  styles.progressDot,
+                  sessionData.status === 'advice_ready' && styles.progressDotCompleted
+                ]} />
+                <Text style={styles.progressText}>Advice</Text>
+              </View>
+            </View>
+          )}
         </View>
         <LinearGradient
           colors={['#10B981', '#059669']}
@@ -335,6 +376,30 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: '600',
     letterSpacing: 0.5,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  progressItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#E2E8F0',
+  },
+  progressDotCompleted: {
+    backgroundColor: '#10B981',
+  },
+  progressText: {
+    fontSize: 10,
+    color: '#64748B',
+    fontWeight: '600',
   },
   statusBadge: {
     flexDirection: 'row',

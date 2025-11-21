@@ -49,6 +49,10 @@ export default function HomeScreen() {
       Alert.alert('Required', 'Please enter your name');
       return false;
     }
+    if (!partnerInfo.email.trim() || !partnerInfo.email.includes('@')) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address');
+      return false;
+    }
     if (!partnerInfo.age.trim() || isNaN(Number(partnerInfo.age)) || Number(partnerInfo.age) < 18 || Number(partnerInfo.age) > 120) {
       Alert.alert('Invalid Age', 'Please enter a valid age (18-120)');
       return false;
@@ -69,6 +73,7 @@ export default function HomeScreen() {
         sessionCode: generatedCode,
         isCreator: 'true',
         name: partnerInfo.name,
+        email: partnerInfo.email,
         age: partnerInfo.age,
         gender: partnerInfo.gender,
       },
@@ -88,6 +93,7 @@ export default function HomeScreen() {
         sessionCode: sessionCode.toUpperCase(),
         isCreator: 'false',
         name: partnerInfo.name,
+        email: partnerInfo.email,
         age: partnerInfo.age,
         gender: partnerInfo.gender,
       },
@@ -252,6 +258,19 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Email</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Enter your email"
+              placeholderTextColor="#94A3B8"
+              value={partnerInfo.email}
+              onChangeText={(text) => setPartnerInfo({ ...partnerInfo, email: text })}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.formSection}>
             <Text style={styles.formLabel}>Age</Text>
             <TextInput
               style={styles.formInput}
@@ -353,6 +372,19 @@ export default function HomeScreen() {
               placeholderTextColor="#94A3B8"
               value={partnerInfo.name}
               onChangeText={(text) => setPartnerInfo({ ...partnerInfo, name: text })}
+            />
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.formLabel}>Email</Text>
+            <TextInput
+              style={styles.formInput}
+              placeholder="Enter your email"
+              placeholderTextColor="#94A3B8"
+              value={partnerInfo.email}
+              onChangeText={(text) => setPartnerInfo({ ...partnerInfo, email: text })}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
           </View>
 

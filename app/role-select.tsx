@@ -6,12 +6,13 @@ import { UserCircle, ArrowLeft, Check } from 'lucide-react-native';
 import { createSession, getSessionByCode, updatePartnerInfo } from '@/lib/database';
 
 export default function RoleSelectScreen() {
-  const { sessionCode, isCreator, name, age, gender } = useLocalSearchParams<{
+  const { sessionCode, isCreator, name, age, gender, email } = useLocalSearchParams<{
     sessionCode: string;
     isCreator: string;
     name?: string;
     age?: string;
     gender?: string;
+    email?: string;
   }>();
   const [selectedRole, setSelectedRole] = useState<'partner_a' | 'partner_b' | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,10 +39,11 @@ export default function RoleSelectScreen() {
 
     try {
       let session;
-      const partnerInfo = name && age && gender ? {
+      const partnerInfo = name && age && gender && email ? {
         name: name,
         age: Number(age),
-        gender: gender
+        gender: gender,
+        email: email
       } : undefined;
 
       if (isCreator === 'true') {
@@ -64,7 +66,7 @@ export default function RoleSelectScreen() {
       }
 
       router.replace({
-        pathname: '/chat',
+        pathname: '/scenario-intake',
         params: {
           sessionId: session.id,
           sessionCode: sessionCode,
