@@ -2,7 +2,7 @@ import { supabase, Session, Message, SessionContext, PartnerRole, MessageRole } 
 
 export const createSession = async (
   sessionCode: string,
-  partnerInfo?: { name: string; age: number; gender: string }
+  partnerInfo?: { name: string; age: number; gender: string; email: string }
 ): Promise<Session | null> => {
   const existingSession = await getSessionByCode(sessionCode);
   if (existingSession) {
@@ -20,6 +20,7 @@ export const createSession = async (
     sessionData.partner_a_name = partnerInfo.name;
     sessionData.partner_a_age = partnerInfo.age;
     sessionData.partner_a_gender = partnerInfo.gender;
+    sessionData.partner_a_email = partnerInfo.email;
   }
 
   const { data, error } = await supabase
@@ -46,7 +47,7 @@ export const createSession = async (
 export const updatePartnerInfo = async (
   sessionId: string,
   partnerRole: 'partner_a' | 'partner_b',
-  partnerInfo: { name: string; age: number; gender: string }
+  partnerInfo: { name: string; age: number; gender: string; email: string }
 ): Promise<boolean> => {
   const updates: any = {};
 
@@ -54,10 +55,12 @@ export const updatePartnerInfo = async (
     updates.partner_a_name = partnerInfo.name;
     updates.partner_a_age = partnerInfo.age;
     updates.partner_a_gender = partnerInfo.gender;
+    updates.partner_a_email = partnerInfo.email;
   } else {
     updates.partner_b_name = partnerInfo.name;
     updates.partner_b_age = partnerInfo.age;
     updates.partner_b_gender = partnerInfo.gender;
+    updates.partner_b_email = partnerInfo.email;
   }
 
   const { error } = await supabase
@@ -193,6 +196,61 @@ export const updateSessionContext = async (
 
   if (error) {
     console.error('Error updating session context:', error);
+    return false;
+  }
+
+  return true;
+};
+
+export const updateScenarioInfo = async (
+  sessionId: string,
+  partnerRole: 'partner_a' | 'partner_b',
+  scenarioInfo: { feeling: string; when_happened: string }
+): Promise<boolean> => {
+  const updates: any = {};
+
+  if (partnerRole === 'partner_a') {
+    updates.partner_a_feeling = scenarioInfo.feeling;
+    updates.partner_a_when_happened = scenarioInfo.when_happened;
+    updates.partner_a_scenario_completed = true;
+  } else {
+    updates.partner_b_feeling = scenarioInfo.feeling;
+    updates.partner_b_when_happened = scenarioInfo.when_happened;
+    updates.partner_b_scenario_completed = true;
+  }
+
+  const { error } = await supabase
+    .from('sessions')
+    .update(updates)
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('Error updating scenario info:', error);
+    return false;
+  }
+
+  return true;
+};
+
+export const updateChatStarted = async (
+  sessionId: string,
+  partnerRole: 'partner_a' | 'partner_b'
+): Promise<boolean> => {
+  const updates: any = {};
+
+  if (partnerRole === 'partner_a') {
+    updates.partner_a_chat_started = true;
+  } else {
+    updates.partner_b_chat_started = true;
+  }
+
+  const { error } = await supabase
+    .from('sessions')
+    .update(updates)
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('Error updating chat started:', error);
     return false;
   }
 

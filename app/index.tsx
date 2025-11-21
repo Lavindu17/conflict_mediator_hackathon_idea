@@ -8,6 +8,7 @@ interface PartnerInfo {
   name: string;
   age: string;
   gender: string;
+  email: string;
 }
 
 export default function HomeScreen() {
@@ -18,6 +19,7 @@ export default function HomeScreen() {
     name: '',
     age: '',
     gender: '',
+    email: '',
   });
 
   const generateSessionCode = () => {
