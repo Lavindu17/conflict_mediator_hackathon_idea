@@ -239,7 +239,7 @@ export default function ChatScreen() {
           <ArrowLeft size={24} color="#1E293B" strokeWidth={2.5} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>pairLogic AI</Text>
+          <Text style={styles.headerTitle}>pairLogic AI - test</Text>
           <Text style={styles.headerSubtitle}>{sessionCode}</Text>
           {sessionData && (
             <View style={styles.progressContainer}>
@@ -248,7 +248,7 @@ export default function ChatScreen() {
                   styles.progressDot,
                   sessionData.partner_a_scenario_completed && sessionData.partner_a_chat_started && styles.progressDotCompleted
                 ]} />
-                <Text style={styles.progressText}>Partner A</Text>
+                <Text style={styles.progressText}>Partner A1</Text>
               </View>
               <View style={styles.progressItem}>
                 <View style={[
