@@ -11,7 +11,8 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="role-select" />
-        <Stack.Screen name="scenario-intake" /> {/* Added this */}
+        {/* 👇 THIS LINE WAS MISSING */}
+        <Stack.Screen name="scenario-intake" /> 
         <Stack.Screen name="chat" />
         <Stack.Screen name="+not-found" />
       </Stack>
