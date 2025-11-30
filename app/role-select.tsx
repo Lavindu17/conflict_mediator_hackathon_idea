@@ -30,10 +30,63 @@ export default function RoleSelectScreen() {
   };
 
   const handleContinue = async () => {
+    console.log('--- Handle Continue Clicked ---');
+    
     if (!selectedRole) {
       Alert.alert('Error', 'Please select your role');
       return;
     }
+
+    setLoading(true);
+
+    try {
+      let session;
+      const partnerInfo = name && age && gender && email ? {
+        name: name,
+        age: Number(age),
+        gender: gender,
+        email: email
+      } : undefined;
+
+      console.log('Partner Info:', partnerInfo);
+      console.log('Is Creator:', isCreator);
+
+      if (isCreator === 'true') {
+        console.log('Creating session...');
+        session = await createSession(sessionCode, partnerInfo);
+      } else {
+        console.log('Getting session...');
+        session = await getSessionByCode(sessionCode);
+        if (session && partnerInfo) {
+          await updatePartnerInfo(session.id, selectedRole, partnerInfo);
+        }
+      }
+
+      console.log('Session Result:', session);
+
+      if (!session) {
+        Alert.alert('Error', 'Failed to create/join session. Check database connection.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Navigating to scenario-intake...');
+      router.replace({
+        pathname: '/scenario-intake',
+        params: {
+          sessionId: session.id,
+          sessionCode: sessionCode,
+          role: selectedRole,
+          partnerName: name || '',
+        },
+      });
+    } catch (error) {
+      console.error('Error setting up session:', error);
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
     setLoading(true);
 
