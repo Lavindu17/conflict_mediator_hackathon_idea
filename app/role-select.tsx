@@ -25,10 +25,6 @@ export default function RoleSelectScreen() {
     }
   }, [isCreator]);
 
-  const handleRoleSelect = (role: 'partner_a' | 'partner_b') => {
-    setSelectedRole(role);
-  };
-
   const handleContinue = async () => {
     console.log('--- Handle Continue Clicked ---');
     
@@ -88,52 +84,6 @@ export default function RoleSelectScreen() {
     }
   };
 
-    setLoading(true);
-
-    try {
-      let session;
-      const partnerInfo = name && age && gender && email ? {
-        name: name,
-        age: Number(age),
-        gender: gender,
-        email: email
-      } : undefined;
-
-      if (isCreator === 'true') {
-        session = await createSession(sessionCode, partnerInfo);
-        if (!session) {
-          Alert.alert('Error', 'Failed to create session. Please try again.');
-          setLoading(false);
-          return;
-        }
-      } else {
-        session = await getSessionByCode(sessionCode);
-        if (!session) {
-          Alert.alert('Error', 'Session not found. Please check the code and try again.');
-          setLoading(false);
-          return;
-        }
-        if (partnerInfo) {
-          await updatePartnerInfo(session.id, selectedRole, partnerInfo);
-        }
-      }
-
-      router.replace({
-        pathname: '/scenario-intake',
-        params: {
-          sessionId: session.id,
-          sessionCode: sessionCode,
-          role: selectedRole,
-          partnerName: name || '',
-        },
-      });
-    } catch (error) {
-      console.error('Error setting up session:', error);
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <View style={styles.container}>
