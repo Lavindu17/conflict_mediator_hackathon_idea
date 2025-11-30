@@ -1,22 +1,24 @@
-import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { View } from 'react-native';
 
-export default function RootLayout() {
-  useFrameworkReady();
-
+export default function Layout() {
   return (
-    <>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="role-select" />
-        {/* 👇 THIS LINE WAS MISSING */}
-        <Stack.Screen name="scenario-intake" /> 
-        <Stack.Screen name="chat" />
-        <Stack.Screen name="+not-found" />
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#FFFFFF' },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="index" />   {/* Home/Login */}
+        <Stack.Screen name="setup" />   {/* Enter Name/Details */}
+        <Stack.Screen name="lobby" />   {/* Wait for partner */}
+        <Stack.Screen name="intake" />  {/* How do you feel? */}
+        <Stack.Screen name="chat" />    {/* The Mediation */}
       </Stack>
-      <StatusBar style="auto" />
-    </>
+      <StatusBar style="dark" />
+    </View>
   );
 }
