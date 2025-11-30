@@ -120,7 +120,7 @@ export default function HomeScreen() {
                 </LinearGradient>
               </View>
             </View>
-            <Text style={styles.appName}>pairLogic test</Text>
+            <Text style={styles.appName}>pairLogic </Text>
             <Text style={styles.tagline}>AI-powered relationship mediation</Text>
           </View>
 
